@@ -52,3 +52,23 @@ dialog::backdrop{background:rgba(10,8,24,.7)}
 .chat-form{flex-wrap:nowrap}.chat-form input{flex:1;min-width:0}
 .msg{margin:4px 0;overflow-wrap:anywhere}.msg b{margin-right:var(--s2)}.msg .tag{margin-right:var(--s2);padding:0 8px}
 .msg.sys{color:var(--muted);font-size:.95rem}
+.duel{display:grid;grid-template-columns:1fr auto 1fr;gap:var(--s3);align-items:stretch}
+.vs,.timer{align-self:center;font-family:var(--font-display);color:var(--muted)} .timer{color:var(--accent);font-size:1.4rem}
+.pstrip{background:var(--panel);border:2px solid var(--line);border-radius:var(--r-md);padding:var(--s3);transition:border-color .2s}
+.pstrip.active{border-color:var(--accent)}
+.budget{font-family:var(--font-display);font-size:1.8rem;color:var(--accent)}
+.midzone{gap:var(--s3)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:var(--s2)}
+.cards.small{grid-template-columns:repeat(auto-fill,minmax(76px,1fr));margin-top:var(--s2)}
+.card{margin:0;aspect-ratio:3/4;border-radius:var(--r-md);overflow:hidden;background:var(--panel-2);border:2px solid var(--line);position:relative;display:flex;flex-direction:column}
+.card img,.card .ph{flex:1;min-height:0;width:100%;object-fit:cover;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.6rem;color:var(--accent)}
+.card figcaption{padding:4px 6px;font-size:.85rem;line-height:1.2;background:var(--ink);overflow-wrap:anywhere}
+.card.back{align-items:center;justify-content:center;font-family:var(--font-display);font-size:2rem;color:var(--muted);cursor:default}
+button.card.back{cursor:pointer;transition:transform .12s,border-color .12s} button.card.back:hover{transform:translateY(-3px);border-color:var(--accent);color:var(--accent)}
+.card.fresh{animation:flip .7s ease-out}
+@keyframes flip{from{transform:rotateY(90deg) scale(.9)}to{transform:none}}
+.bidzone{display:grid;grid-template-columns:130px 1fr;gap:var(--s3);align-items:start}
+.bidzone .card{width:130px}
+.result{margin:0;padding:var(--s2) var(--s3);background:var(--panel-2);border-left:5px solid var(--accent);border-radius:var(--r-sm);animation:flip .5s ease-out}
+.teams{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+@media(max-width:560px){.duel{grid-template-columns:1fr 1fr}.vs,.timer{grid-column:1/-1;order:3}.bidzone{grid-template-columns:1fr}}

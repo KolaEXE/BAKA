@@ -2,10 +2,12 @@ import { h, toast, friendly } from '../core/utils.js';
 import { universeLabel } from '../config/constants.js';
 import { watchRoom, watchPresence, connectPresence, leaveRoom, setSetting, watchConnection, createMaintainer } from '../platform/rooms.js';
 import { createChat } from './chat.js';
+import { createBoard } from './board.js';
+import { startGame, resetToLobby } from '../games/draft/net.js';
 
 export function renderLobby(root, ctx, code, nav) {
   const uid = ctx.user.uid;
-  let room = null, online = {}, stopPresence = null, chat = null;
+  let room = null, online = {}, stopPresence = null, chat = null, board = null;
   const maint = createMaintainer(code, uid);
   const banner = h('div', { class: 'banner', role: 'status', hidden: true }, 'Connexion perdue. Reconnexion en cours…');
   const info = h('section', { class: 'panel stack' });
@@ -20,7 +22,7 @@ export function renderLobby(root, ctx, code, nav) {
   });
 
   const message = text => { teardownView(); root.replaceChildren(h('div', { class: 'wrap stack' }, h('p', { class: 'empty' }, text), h('button', { class: 'btn', onclick: () => nav('/') }, "Retour à l'accueil"))); };
-  const teardownView = () => { chat?.destroy(); chat = null; };
+  const teardownView = () => { chat?.destroy(); chat = null; board?.destroy(); board = null; };
 
   const draw = () => {
     if (!room) { message(`La room ${code} n'existe plus.`); return; }
@@ -50,12 +52,22 @@ export function renderLobby(root, ctx, code, nav) {
     info.replaceChildren(h('h2', {}, s.name), h('div', { class: 'code' }, code),
       h('button', { class: 'btn', onclick: () => navigator.clipboard.writeText(link).then(() => toast("Lien d'invitation copié."), () => toast(link)) }, "Copier le lien d'invitation"),
       h('p', { class: 'muted' }, `${universeLabel(s.universe)} · ${s.cards} cartes · budget ${s.budget}M · ${s.isPublic ? 'publique' : 'privée'} · spectateurs ${s.spectators ? 'autorisés' : 'interdits'}${s.timer.on ? ` · timer ${s.timer.sec}s` : ''}`));
-    side.replaceChildren(h('h3', {}, `Joueurs (${gamers.length}/${s.maxPlayers})`), h('div', {}, gamers.map(row)),
-      specs.length ? h('h3', {}, `Spectateurs (${specs.length})`) : null, specs.length ? h('div', {}, specs.map(row)) : null,
-      s.host === uid ? h('button', { class: 'btn primary', disabled: true }, 'Lancer la partie (étape 5)') : h('p', { class: 'muted' }, "En attente de l'hôte…"));
+    if (room.game) {
+      if (!board) { board = createBoard({ uid, onReset: () => resetToLobby(code).catch(e => toast(friendly(e), 'error')) }); side.replaceChildren(board.el); }
+      board.update(room, online);
+    } else {
+      board?.destroy(); board = null;
+      const ready = gamers.length === s.maxPlayers;
+      side.replaceChildren(...[h('h3', {}, `Joueurs (${gamers.length}/${s.maxPlayers})`), h('div', {}, gamers.map(row)),
+        specs.length ? h('h3', {}, `Spectateurs (${specs.length})`) : null, specs.length ? h('div', {}, specs.map(row)) : null,
+        s.host === uid ? h('button', { class: 'btn primary', disabled: !ready, onclick: async e => {
+          e.target.disabled = true;
+          try { await startGame(code, room); } catch (x) { toast(friendly(x), 'error'); e.target.disabled = false; }
+        } }, ready ? 'Lancer la partie' : "En attente d'un 2e joueur") : h('p', { class: 'muted' }, "En attente de l'hôte…")].filter(Boolean));
+    }
     chat.refresh();
   };
-  const a = watchRoom(code, r => { room = r; draw(); });
+  const a = watchRoom(code, r => { room = r && { ...r, code }; draw(); });
   const b = watchPresence(code, p => { online = p; if (room) draw(); });
   return () => { a(); b(); offConn(); clearTimeout(bannerTimer); maint.stop(); teardownView(); stopPresence?.(); };
 }

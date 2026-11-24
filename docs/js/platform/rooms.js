@@ -2,8 +2,9 @@ import { ref, get, set, update, remove, onValue, runTransaction, onDisconnect, s
   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 import { db } from '../core/firebase.js';
 import { AppError, genCode, sha256 } from '../core/utils.js';
-import { GRACE_EMPTY_MS, HOST_GRACE_MS, ABSENT_MS } from '../config/constants.js';
+import { GRACE_EMPTY_MS, HOST_GRACE_MS, ABSENT_MS, FORFEIT_MS } from '../config/constants.js';
 import { sendSystem } from './chat.js';
+import { act } from '../games/draft/net.js';
 
 const roomRef = c => ref(db, `rooms/${c}`);
 const listRef = c => ref(db, `roomList/${c}`);
@@ -67,6 +68,9 @@ export async function leaveRoom(code, uid) {
   const snap = await get(roomRef(code));
   if (!snap.exists()) return;
   const { settings, players = {} } = snap.val();
+  const full = snap.val(); // quitter en pleine partie = forfait
+  if (settings.status === 'playing' && full.game && full.game.phase !== 'done' && full.game.players.includes(uid))
+    await act(code, full, { type: 'forfeit', uid, loser: uid }).catch(() => {});
   await remove(ref(db, `rooms/${code}/players/${uid}`));
   sendSystem(code, `${players[uid]?.name ?? 'Un joueur'} a quitté la room.`);
   const rest = Object.entries(players).filter(([id]) => id !== uid).sort((a, b) => a[1].joinedAt - b[1].joinedAt);
@@ -127,6 +131,8 @@ export function createMaintainer(code, uid) {
     if (!online[s.host]) timers.push(setTimeout(() => takeOverHost(s.host).catch(console.warn), HOST_GRACE_MS));
     if (s.status === 'waiting') for (const id of Object.keys(players))
       if (id !== s.host && !online[id]) timers.push(setTimeout(() => dropAbsent(id).catch(console.warn), ABSENT_MS));
+    if (s.status === 'playing' && room.game && room.game.phase !== 'done') for (const id of room.game.players)
+      if (!online[id]) timers.push(setTimeout(() => forfeitAbsent(id).catch(console.warn), FORFEIT_MS));
   };
   async function takeOverHost(old) {
     if (online[old] || room?.settings.host !== old || leader() !== uid) return;
@@ -140,10 +146,14 @@ export function createMaintainer(code, uid) {
     await remove(ref(db, `rooms/${code}/players/${id}`));
     sendSystem(code, `${name} a été retiré (absent).`);
   }
+  async function forfeitAbsent(id) {
+    if (online[id] || leader() !== uid || !room?.game || room.game.phase === 'done') return;
+    await act(code, room, { type: 'forfeit', uid, loser: id });
+  }
   return {
     update(r, o) {
       room = r; online = o;
-      const next = r ? `${r.settings.host}|${r.settings.status}|${leader()}|${Object.keys(r.players || {}).filter(id => !o[id]).sort()}` : '';
+      const next = r ? `${r.settings.host}|${r.settings.status}|${r.game?.phase}|${leader()}|${Object.keys(r.players || {}).filter(id => !o[id]).sort()}` : '';
       if (next !== sig) { sig = next; plan(); }
     },
     stop: clear

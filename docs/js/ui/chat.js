@@ -34,10 +34,10 @@ export function createChat({ code, user, getMe, getSettings, isHost, setGlobalHi
   const controls = () => {
     const s = getSettings();
     const box = (label, checked, onchange) => { const i = h('input', { type: 'checkbox', checked, onchange: () => onchange(i.checked) }); return h('label', { class: 'check' }, i, label); };
-    ctl.replaceChildren(
+    ctl.replaceChildren(...[
       box('Masquer les messages des spectateurs (pour moi)', localHide, v => { localHide = v; writeLocal(v); render(); }),
       isHost() ? box('Masquer les messages des spectateurs pour tout le monde', !!s.hideSpecChat, v => setGlobalHide(v).catch(x => toast(friendly(x), 'error'))) : null,
-      s.hideSpecChat && !isHost() ? h('p', { class: 'muted', style: 'margin:0' }, "L'hôte a masqué les messages des spectateurs.") : null);
+      s.hideSpecChat && !isHost() ? h('p', { class: 'muted', style: 'margin:0' }, "L'hôte a masqué les messages des spectateurs.") : null].filter(Boolean));
   };
   const stop = watchChat(code, (_k, m) => { msgs.push(m); if (msgs.length > 200) msgs.shift(); render(); });
   controls();
