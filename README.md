@@ -1,4 +1,4 @@
-# Baka
+# BAKA
 
 A collection of multiplayer games inspired by anime, manga and Japanese pop culture.
 
