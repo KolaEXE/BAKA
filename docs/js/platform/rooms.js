@@ -2,7 +2,8 @@ import { ref, get, set, update, remove, onValue, runTransaction, onDisconnect, s
   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 import { db } from '../core/firebase.js';
 import { AppError, genCode, sha256 } from '../core/utils.js';
-import { GRACE_EMPTY_MS } from '../config/constants.js';
+import { GRACE_EMPTY_MS, HOST_GRACE_MS, ABSENT_MS } from '../config/constants.js';
+import { sendSystem } from './chat.js';
 
 const roomRef = c => ref(db, `rooms/${c}`);
 const listRef = c => ref(db, `roomList/${c}`);
@@ -21,6 +22,7 @@ export async function createRoom(user, name, form) {
     if (res.committed) {
       await set(listRef(code), { name: settings.name, universe: settings.universe, status: 'waiting', host: user.uid,
         isPublic: settings.isPublic, hasPass: !!settings.passHash, maxPlayers: 2, spectators: settings.spectators, emptySince: null });
+      sendSystem(code, `${name} a créé la room.`);
       return code;
     }
   }
@@ -45,6 +47,7 @@ export async function joinRoom(user, name, code, { asSpectator = false, password
     return cur;
   });
   if (!res.committed) throw new AppError(settings.status === 'waiting' ? 'La room est complète et les spectateurs sont désactivés.' : 'La partie a commencé et les spectateurs sont désactivés.');
+  sendSystem(code, `${name} a rejoint en tant que ${role === 'player' ? 'joueur' : 'spectateur'}.`);
   return role;
 }
 
@@ -65,6 +68,7 @@ export async function leaveRoom(code, uid) {
   if (!snap.exists()) return;
   const { settings, players = {} } = snap.val();
   await remove(ref(db, `rooms/${code}/players/${uid}`));
+  sendSystem(code, `${players[uid]?.name ?? 'Un joueur'} a quitté la room.`);
   const rest = Object.entries(players).filter(([id]) => id !== uid).sort((a, b) => a[1].joinedAt - b[1].joinedAt);
   if (settings.host === uid && rest.length) {
     const next = (rest.find(([, p]) => p.role === 'player') || rest[0])[0];
@@ -96,6 +100,52 @@ function sweep(r) {
   if (!empty && r.emptySince) update(listRef(r.code), { emptySince: null });
   else if (empty && !r.emptySince) update(listRef(r.code), { emptySince: Date.now() });
   else if (empty && Date.now() - r.emptySince > GRACE_EMPTY_MS) {
-    remove(roomRef(r.code)); remove(listRef(r.code));
+    remove(roomRef(r.code)); remove(listRef(r.code)); remove(ref(db, `chat/${r.code}`)); remove(ref(db, `presence/${r.code}`));
   }
+}
+
+export const setSetting = (code, key, value) => update(ref(db, `rooms/${code}/settings`), { [key]: value });
+
+/** Indique si le navigateur est connecté à Firebase (true/false), pour afficher un bandeau de reconnexion. */
+export const watchConnection = cb => onValue(ref(db, '.info/connected'), s => cb(s.val() === true));
+
+/**
+ * Maintenance de la room, exécutée par UN seul client (le plus ancien en ligne) :
+ *  - hôte hors ligne depuis HOST_GRACE_MS -> transfert au plus ancien joueur en ligne ;
+ *  - joueur/spectateur hors ligne depuis ABSENT_MS (room en attente) -> retiré pour libérer sa place.
+ * Les transactions garantissent qu'un seul transfert est appliqué même en cas de doublon.
+ */
+export function createMaintainer(code, uid) {
+  let room = null, online = {}, sig = '', timers = [];
+  const clear = () => { timers.forEach(clearTimeout); timers = []; };
+  const byAge = () => Object.entries(room?.players || {}).filter(([id]) => online[id]).sort((a, b) => a[1].joinedAt - b[1].joinedAt);
+  const leader = () => byAge()[0]?.[0];
+  const plan = () => {
+    clear();
+    if (!room || leader() !== uid) return;
+    const { settings: s, players = {} } = room;
+    if (!online[s.host]) timers.push(setTimeout(() => takeOverHost(s.host).catch(console.warn), HOST_GRACE_MS));
+    if (s.status === 'waiting') for (const id of Object.keys(players))
+      if (id !== s.host && !online[id]) timers.push(setTimeout(() => dropAbsent(id).catch(console.warn), ABSENT_MS));
+  };
+  async function takeOverHost(old) {
+    if (online[old] || room?.settings.host !== old || leader() !== uid) return;
+    const next = (byAge().find(([, p]) => p.role === 'player') || byAge()[0])[0];
+    const res = await runTransaction(ref(db, `rooms/${code}/settings/host`), cur => cur === old ? next : undefined);
+    if (res.committed) { update(listRef(code), { host: next }); sendSystem(code, `${room.players[next].name} est le nouvel hôte.`); }
+  }
+  async function dropAbsent(id) {
+    if (online[id] || !room?.players?.[id] || leader() !== uid) return;
+    const name = room.players[id].name;
+    await remove(ref(db, `rooms/${code}/players/${id}`));
+    sendSystem(code, `${name} a été retiré (absent).`);
+  }
+  return {
+    update(r, o) {
+      room = r; online = o;
+      const next = r ? `${r.settings.host}|${r.settings.status}|${leader()}|${Object.keys(r.players || {}).filter(id => !o[id]).sort()}` : '';
+      if (next !== sig) { sig = next; plan(); }
+    },
+    stop: clear
+  };
 }

@@ -1,0 +1,9 @@
+:root{
+  --ink:#17142b; --panel:#221e3d; --panel-2:#2c2750; --line:#3d3768;
+  --text:#f3efe6; --muted:#aaa4c8; --accent:#ffc531; --on-accent:#1b1500;
+  --ok:#5fd3a0; --bad:#ff7a7a;
+  --font-display:'Dela Gothic One',system-ui,sans-serif;
+  --font-body:'Figtree',system-ui,sans-serif;
+  --r-sm:8px; --r-md:14px; --r-lg:22px;
+  --s1:4px; --s2:8px; --s3:16px; --s4:24px; --s5:40px;
+}
