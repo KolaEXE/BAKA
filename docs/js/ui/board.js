@@ -1,6 +1,8 @@
 import { h, toast, friendly } from '../core/utils.js';
 import { act, serverNow } from '../games/draft/net.js';
 import { teamOf } from '../games/draft/auction.js';
+import { saveStats } from '../games/draft/net.js';
+import { createReveal } from './reveal.js';
 
 const RPS = { r: 'Pierre', p: 'Feuille', s: 'Ciseaux' };
 const initials = n => n.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
@@ -8,11 +10,15 @@ const initials = n => n.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpper
 /** Plateau de jeu. update() ne redessine que si l'état a changé (le champ de mise garde donc sa valeur). */
 export function createBoard({ uid, onReset }) {
   const el = h('div', { class: 'stack board' });
-  let room, online = {}, sig = '', timer = null, tick = null, bidVal = 0, bidSeq = -1;
+  let room, online = {}, sig = '', reveal = null, statsSaved = false, timer = null, tick = null, bidVal = 0, bidSeq = -1;
   const run = async a => { try { await act(room.code, room, a); } catch (e) { toast(friendly(e), 'error'); } };
 
   const render = () => {
     clearTimeout(timer); clearInterval(tick);
+    if (room.game.phase === 'done' && !room.game.forfeit) { // fin normale : révélation puis résultats
+      if (!reveal) { reveal = createReveal({ uid, onReset }); el.replaceChildren(reveal.el); }
+      reveal.update(room); return;
+    }
     const g = room.game, s = room.settings, deck = room.deck || [], [p0, p1] = g.players, half = s.cards / 2;
     const name = id => room.players?.[id]?.name ?? 'Joueur', other = id => (id === p0 ? p1 : p0);
     const isPlayer = g.players.includes(uid), actor = g.phase === 'pick' ? g.turn : g.phase === 'bid' ? g.bid.actor : g.phase === 'rpsWin' ? g.rps.winner : null;
@@ -55,10 +61,9 @@ export function createBoard({ uid, onReset }) {
             mine ? h('div', { class: 'stack' }, min <= max ? h('div', { class: 'row' }, input, btn(b.price === null ? 'Proposer' : 'Surenchérir', () => run({ type: 'bid', uid, amount: Math.round(+input.value) }), 'primary')) : p(`Budget insuffisant (${max}M).`),
               b.price !== null ? btn(`Laisser à ${name(b.bidder)} (${b.price}M)`, () => run({ type: 'fold', uid })) : null) : p(`En attente de ${name(b.actor)}…`))));
       }
-    } else { // done
-      const t = id => teamOf(g, id).reduce((a, i) => a + g.prices['c' + i], 0);
-      mid = [h('h3', {}, g.forfeit ? `${name(g.forfeit)} a abandonné` : 'Toutes les cartes sont distribuées'),
-        p(`Dépenses : ${name(p0)} ${t(p0)}M · ${name(p1)} ${t(p1)}M. La révélation des stats arrive à l'étape 6.`),
+    } else { // fin par forfait
+      if (isPlayer && !statsSaved) { statsSaved = true; saveStats(uid, g.id, g.forfeit !== uid, 0); }
+      mid = [h('h3', {}, `${name(g.forfeit)} a abandonné`), p(`${name(other(g.forfeit))} gagne par forfait.`),
         room.settings.host === uid ? btn('Retour au lobby', onReset, 'primary') : p("En attente de l'hôte pour retourner au lobby…")];
     }
 
@@ -74,7 +79,7 @@ export function createBoard({ uid, onReset }) {
       h('div', { class: 'teams' }, h('div', {}, h('b', {}, name(p0)), team(p0)), h('div', {}, h('b', {}, name(p1)), team(p1))));
   };
   return {
-    el, destroy: () => { clearTimeout(timer); clearInterval(tick); },
+    el, destroy: () => { clearTimeout(timer); clearInterval(tick); reveal?.destroy(); },
     update(r, o) { room = r; online = o; const k = `${r.game.seq}|${Object.keys(o).sort()}|${Object.keys(r.players || {}).length}`; if (k !== sig) { sig = k; render(); } }
   };
 }

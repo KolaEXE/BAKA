@@ -14,25 +14,16 @@ export function renderHub(root, ctx, nav) {
   let rooms = [];
 
   const persistName = async () => { const n = getName(); ctx.profile.name = n; try { await saveName(user.uid, n); } catch {} return n; };
-  const go = async (code, opts) => {
-    try { const n = await persistName(); await joinRoom(user, n, code, opts); nav(`/room/${code}`); }
-    catch (e) { toast(friendly(e), 'error'); }
-  };
-  const join = (r, asSpec) => {
-    const pass = r.hasPass ? prompt('Mot de passe de la room :') : '';
-    if (pass === null) return;
-    go(r.code, { asSpectator: asSpec, password: pass });
-  };
+  const go = code => { ctx.profile.name = getName(); nav(`/room/${code}`); };
 
   const draw = () => {
-    const shown = rooms.filter(r => r.isPublic && (!fUni.value || r.universe === fUni.value) && (!fStat.value || r.status === fStat.value));
+    const shown = rooms.filter(r => r.isPublic && r.players + r.specs > 0 && (!fUni.value || r.universe === fUni.value) && (!fStat.value || r.status === fStat.value));
     list.replaceChildren(...(shown.length ? shown.map(r => h('div', { class: 'room' },
       h('div', {}, h('b', {}, r.name), ' ', r.hasPass ? h('span', { class: 'tag' }, 'Mot de passe') : null,
         h('div', { class: 'muted' }, `${universeLabel(r.universe)} · ${r.players}/${r.maxPlayers} joueurs · ${r.specs} spectateur${r.specs > 1 ? 's' : ''}`)),
       h('div', { class: 'row' },
         h('span', { class: `tag ${r.status === 'waiting' ? 'wait' : 'live'}` }, r.status === 'waiting' ? 'En attente' : 'En cours'),
-        r.status === 'waiting' && r.players < r.maxPlayers ? h('button', { class: 'btn small primary', onclick: () => join(r, false) }, 'Jouer') : null,
-        r.spectators ? h('button', { class: 'btn small', onclick: () => join(r, true) }, 'Regarder') : null)))
+        h('button', { class: 'btn small primary', onclick: () => go(r.code) }, 'Rejoindre'))))
       : [h('p', { class: 'empty' }, 'Aucune room publique. Crée la première et invite tes amis.')]));
   };
   fUni.onchange = fStat.onchange = draw;
@@ -59,7 +50,7 @@ export function renderHub(root, ctx, nav) {
         h('p', { class: 'muted' }, 'Enchéris sur des personnages sans voir leur puissance. Les stats tombent à la fin.'),
         h('button', { class: 'btn primary', onclick: () => dlg.showModal() }, 'Créer une room'),
         h('div', { class: 'field' }, h('label', { for: 'code' }, h('span', {}, 'Rejoindre avec un code')), codeIn),
-        h('button', { class: 'btn', onclick: () => { const c = normCode(codeIn.value); c.length === 5 ? go(c, {}) : toast('Le code contient 5 caractères.', 'error'); } }, 'Rejoindre')),
+        h('button', { class: 'btn', onclick: () => { const c = normCode(codeIn.value); c.length === 5 ? go(c) : toast('Le code contient 5 caractères.', 'error'); } }, 'Rejoindre')),
       h('section', { class: 'panel' }, h('h2', {}, 'Rooms publiques'), h('div', { class: 'filters' }, fUni, fStat), list)),
     dlg));
   return () => stop();

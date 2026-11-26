@@ -62,23 +62,37 @@ export function connectPresence(code, uid, role) {
   return () => { off(); remove(p); };
 }
 
-/** Quitte volontairement. Si l'hôte part, le plus ancien joueur restant devient hôte. */
+/** Quitte volontairement. Dernier membre = room supprimée. Si l'hôte part, le plus ancien membre restant devient hôte. */
 export async function leaveRoom(code, uid) {
   await remove(ref(db, `presence/${code}/${uid}`));
   const snap = await get(roomRef(code));
   if (!snap.exists()) return;
-  const { settings, players = {} } = snap.val();
-  const full = snap.val(); // quitter en pleine partie = forfait
-  if (settings.status === 'playing' && full.game && full.game.phase !== 'done' && full.game.players.includes(uid))
+  const full = snap.val(), { settings, players = {} } = full;
+  if (settings.status === 'playing' && full.game && full.game.phase !== 'done' && full.game.players.includes(uid)) // quitter en pleine partie = forfait
     await act(code, full, { type: 'forfeit', uid, loser: uid }).catch(() => {});
+  const rest = Object.entries(players).filter(([id]) => id !== uid).sort((a, b) => a[1].joinedAt - b[1].joinedAt);
+  if (!rest.length) {
+    await Promise.all([roomRef(code), listRef(code), ref(db, `chat/${code}`), ref(db, `presence/${code}`)].map(r => remove(r)));
+    return;
+  }
   await remove(ref(db, `rooms/${code}/players/${uid}`));
   sendSystem(code, `${players[uid]?.name ?? 'Un joueur'} a quitté la room.`);
-  const rest = Object.entries(players).filter(([id]) => id !== uid).sort((a, b) => a[1].joinedAt - b[1].joinedAt);
-  if (settings.host === uid && rest.length) {
+  if (settings.host === uid) {
     const next = (rest.find(([, p]) => p.role === 'player') || rest[0])[0];
     await update(roomRef(code), { 'settings/host': next });
     await update(listRef(code), { host: next });
   }
+}
+
+/** Modifie les paramètres (hôte). `password` : texte = nouveau mot de passe, '' = retirer. */
+export async function updateSettings(code, patch) {
+  const { password, ...upd } = patch;
+  if (password !== undefined) upd.passHash = password ? await sha256(password) : null;
+  await update(ref(db, `rooms/${code}/settings`), upd);
+  const l = {};
+  for (const k of ['name', 'universe', 'isPublic', 'spectators']) if (k in upd) l[k] = upd[k];
+  if ('passHash' in upd) l.hasPass = !!upd.passHash;
+  if (Object.keys(l).length) await update(listRef(code), l);
 }
 
 export const watchRoom = (code, cb) => onValue(roomRef(code), s => cb(s.val()));

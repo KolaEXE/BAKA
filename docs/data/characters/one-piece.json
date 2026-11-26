@@ -1,0 +1,259 @@
+{
+ "universe": "one-piece",
+ "label": "One Piece",
+ "generatedAt": "2026-11-26T15:13:56.409Z",
+ "characters": [
+  {
+   "id": "one-piece-62",
+   "name": "Zoro Roronoa",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b62-S7oAeA9WInjV.png",
+   "universe": "one-piece",
+   "power": 5600,
+   "popularity": 28922,
+   "anilistId": 62
+  },
+  {
+   "id": "one-piece-305",
+   "name": "Sanji",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b305-6lisPmHtCnLT.png",
+   "universe": "one-piece",
+   "power": 4900,
+   "popularity": 15368,
+   "anilistId": 305
+  },
+  {
+   "id": "one-piece-61",
+   "name": "Robin Nico",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b61-ywXUyyocEEqt.png",
+   "universe": "one-piece",
+   "power": 2300,
+   "popularity": 14919,
+   "anilistId": 61
+  },
+  {
+   "id": "one-piece-723",
+   "name": "Nami",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b723-vp5hPptgnNEC.png",
+   "universe": "one-piece",
+   "power": 1100,
+   "popularity": 10250,
+   "anilistId": 723
+  },
+  {
+   "id": "one-piece-309",
+   "name": "Chopper Tony Tony",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b309-H64NhbJ2ywIQ.jpg",
+   "universe": "one-piece",
+   "power": 1700,
+   "popularity": 8787,
+   "anilistId": 309
+  },
+  {
+   "id": "one-piece-724",
+   "name": "Usopp",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b724-GFGgI9AJQkfy.jpg",
+   "universe": "one-piece",
+   "power": 1500,
+   "popularity": 6713,
+   "anilistId": 724
+  },
+  {
+   "id": "one-piece-727",
+   "name": "Shanks",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b727-wUJx7M1z5xON.png",
+   "universe": "one-piece",
+   "power": 5800,
+   "popularity": 5864,
+   "anilistId": 727
+  },
+  {
+   "id": "one-piece-5627",
+   "name": "Brook",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b5627-av8oD3zhKvDl.png",
+   "universe": "one-piece",
+   "power": 2000,
+   "popularity": 5099,
+   "anilistId": 5627
+  },
+  {
+   "id": "one-piece-16342",
+   "name": "Hancock Boa",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b16342-kVOF6V5Q94go.png",
+   "universe": "one-piece",
+   "power": 3900,
+   "popularity": 4803,
+   "anilistId": 16342
+  },
+  {
+   "id": "one-piece-2754",
+   "name": "Doflamingo Donquixote",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b2754-B4gGSlNYgsyh.jpg",
+   "universe": "one-piece",
+   "power": 4000,
+   "popularity": 4332,
+   "anilistId": 2754
+  },
+  {
+   "id": "one-piece-2751",
+   "name": "Newgate Edward",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b2751-NnzW0N2vCTjX.jpg",
+   "universe": "one-piece",
+   "power": 6300,
+   "popularity": 4147,
+   "anilistId": 2751
+  },
+  {
+   "id": "one-piece-64",
+   "name": "Franky",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/n64-ChX6ZzHHjXqA.png",
+   "universe": "one-piece",
+   "power": 2300,
+   "popularity": 4068,
+   "anilistId": 64
+  },
+  {
+   "id": "one-piece-18938",
+   "name": "Jinbe",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b18938-yZANEfjsVhW4.png",
+   "universe": "one-piece",
+   "power": 4500,
+   "popularity": 2892,
+   "anilistId": 18938
+  },
+  {
+   "id": "one-piece-32893",
+   "name": "Sabo",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b32893-3weZS61cdwLD.png",
+   "universe": "one-piece",
+   "power": 4700,
+   "popularity": 2416,
+   "anilistId": 32893
+  },
+  {
+   "id": "one-piece-2064",
+   "name": "Dracule Mihawk",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/n2064-OpnF4nLi6bvL.png",
+   "universe": "one-piece",
+   "power": 5600,
+   "popularity": 2401,
+   "anilistId": 2064
+  },
+  {
+   "id": "one-piece-176840",
+   "name": "Yamato",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b176840-8KRqXXLJeLOg.png",
+   "universe": "one-piece",
+   "power": 4700,
+   "popularity": 2375,
+   "anilistId": 176840
+  },
+  {
+   "id": "one-piece-725",
+   "name": "Buggy",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/n725-g04AaiaK5f9B.png",
+   "universe": "one-piece",
+   "power": 1600,
+   "popularity": 2133,
+   "anilistId": 725
+  },
+  {
+   "id": "one-piece-726",
+   "name": "Vivi Nefertari",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b726-DqAIpscMuYYx.png",
+   "universe": "one-piece",
+   "power": 700,
+   "popularity": 2013,
+   "anilistId": 726
+  },
+  {
+   "id": "one-piece-2749",
+   "name": "Crocodile",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b2749-e8ebEBN1SlS2.png",
+   "universe": "one-piece",
+   "power": 3400,
+   "popularity": 1998,
+   "anilistId": 2749
+  },
+  {
+   "id": "one-piece-2752",
+   "name": "Kuzan",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b2752-0ENS2a39muDz.png",
+   "universe": "one-piece",
+   "power": 5400,
+   "popularity": 1817,
+   "anilistId": 2752
+  },
+  {
+   "id": "one-piece-7453",
+   "name": "Kuma Bartholomew",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b7453-c3MArieFBs9w.png",
+   "universe": "one-piece",
+   "power": 4000,
+   "popularity": 1649,
+   "anilistId": 7453
+  },
+  {
+   "id": "one-piece-17142",
+   "name": "Rayleigh Silvers",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b17142-OXOpztWZIE2A.png",
+   "universe": "one-piece",
+   "power": 5300,
+   "popularity": 1487,
+   "anilistId": 17142
+  },
+  {
+   "id": "one-piece-2753",
+   "name": "Smoker",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b2753-Y2ja8Pl6PRs0.jpg",
+   "universe": "one-piece",
+   "power": 2900,
+   "popularity": 1390,
+   "anilistId": 2753
+  },
+  {
+   "id": "one-piece-149797",
+   "name": "Oden Kouzuki",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b149797-UmdR7up3kgoK.png",
+   "universe": "one-piece",
+   "power": 4800,
+   "popularity": 1251,
+   "anilistId": 149797
+  },
+  {
+   "id": "one-piece-14989",
+   "name": "Kid Eustass",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b14989-uykLqnBTdAc2.jpg",
+   "universe": "one-piece",
+   "power": 4200,
+   "popularity": 1025,
+   "anilistId": 14989
+  },
+  {
+   "id": "one-piece-1541",
+   "name": "Enel",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b1541-6c8RouunoL88.jpg",
+   "universe": "one-piece",
+   "power": 3300,
+   "popularity": 857,
+   "anilistId": 1541
+  },
+  {
+   "id": "one-piece-21093",
+   "name": "Borsalino",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b21093-Pc4kOjUn3ZkZ.png",
+   "universe": "one-piece",
+   "power": 5300,
+   "popularity": 706,
+   "anilistId": 21093
+  },
+  {
+   "id": "one-piece-5677",
+   "name": "Lucci Rob",
+   "image": "https://s4.anilist.co/file/anilistcdn/character/large/b5677-ZrZunVe7Kq5P.png",
+   "universe": "one-piece",
+   "power": 3700,
+   "popularity": 609,
+   "anilistId": 5677
+  }
+ ]
+}

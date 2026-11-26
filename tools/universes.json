@@ -1,0 +1,8 @@
+[
+  { "id": "one-piece", "label": "One Piece", "search": ["One Piece"], "ids": [], "minFavourites": 300, "maxCharacters": 150, "pages": 4 },
+  { "id": "naruto", "label": "Naruto", "search": ["Naruto", "Naruto: Shippuuden"], "ids": [], "minFavourites": 300, "maxCharacters": 150, "pages": 4 },
+  { "id": "dragon-ball", "label": "Dragon Ball", "search": ["Dragon Ball", "Dragon Ball Z", "Dragon Ball Super"], "ids": [], "minFavourites": 300, "maxCharacters": 150, "pages": 4 },
+  { "id": "bleach", "label": "Bleach", "search": ["Bleach"], "ids": [], "minFavourites": 300, "maxCharacters": 150, "pages": 4 },
+  { "id": "jujutsu-kaisen", "label": "Jujutsu Kaisen", "search": ["Jujutsu Kaisen"], "ids": [], "minFavourites": 200, "maxCharacters": 120, "pages": 3 },
+  { "id": "hunter-x-hunter", "label": "Hunter x Hunter", "search": ["Hunter x Hunter (2011)"], "ids": [], "minFavourites": 200, "maxCharacters": 120, "pages": 3 }
+]

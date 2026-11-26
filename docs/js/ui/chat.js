@@ -9,7 +9,7 @@ const writeLocal = v => { try { localStorage.setItem(LS_KEY, v ? '1' : '0'); } c
  * Chat de room. Masquage des spectateurs : choix personnel (local) pour tous,
  * et choix global (settings.hideSpecChat) réservé à l'hôte.
  */
-export function createChat({ code, user, getMe, getSettings, isHost, setGlobalHide }) {
+export function createChat({ code, user, getMe, getSettings, isHost, setGlobalHide, onClose }) {
   const msgs = [];
   let localHide = readLocal(), last = 0;
   const log = h('div', { class: 'chat-log', role: 'log', 'aria-live': 'polite' });
@@ -41,5 +41,5 @@ export function createChat({ code, user, getMe, getSettings, isHost, setGlobalHi
   };
   const stop = watchChat(code, (_k, m) => { msgs.push(m); if (msgs.length > 200) msgs.shift(); render(); });
   controls();
-  return { el: h('div', { class: 'stack' }, h('h3', {}, 'Chat'), log, form, ctl), refresh: () => { controls(); render(); }, destroy: stop };
+  return { el: h('div', { class: 'stack' }, h('div', { class: 'row between' }, h('h3', {}, 'Chat'), onClose ? h('button', { class: 'btn small', onclick: onClose }, 'Réduire') : null), log, form, ctl), refresh: () => { controls(); render(); }, destroy: stop };
 }

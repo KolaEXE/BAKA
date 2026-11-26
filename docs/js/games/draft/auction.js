@@ -5,8 +5,8 @@ import { BEATS, rpsWinner } from './rps.js';
 const clone = o => JSON.parse(JSON.stringify(o));
 const deadline = ctx => (ctx.timerOn ? ctx.now + ctx.sec * 1000 : null);
 
-export function newGame({ players, budget }) {
-  return { seq: 0, phase: 'rps', players, budgets: { [players[0]]: budget, [players[1]]: budget },
+export function newGame({ players, budget, id }) {
+  return { id, seq: 0, phase: 'rps', players, budgets: { [players[0]]: budget, [players[1]]: budget },
     taken: {}, prices: {}, rps: { round: 1 }, turn: null, pick: null, bid: null, last: null, deadline: null };
 }
 /** Cartes d'une équipe (Firebase supprime les tableaux vides, d'où le ||). */

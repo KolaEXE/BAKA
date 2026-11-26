@@ -15,7 +15,7 @@ export async function startGame(code, room) {
   const players = Object.entries(room.players).filter(([, p]) => p.role === 'player').sort((a, b) => a[1].joinedAt - b[1].joinedAt).map(([id]) => id);
   if (players.length !== 2) throw new AppError('Il faut 2 joueurs pour lancer la partie.');
   const deck = await loadDeck(s.universe, s.cards);
-  await update(ref(db, `rooms/${code}`), { deck, game: newGame({ players, budget: s.budget }), 'settings/status': 'playing' });
+  await update(ref(db, `rooms/${code}`), { deck, game: newGame({ players, budget: s.budget, id: String(Date.now()) }), 'settings/status': 'playing' });
   await update(ref(db, `roomList/${code}`), { status: 'playing' });
   sendSystem(code, 'La partie commence : shifumi pour désigner qui choisit en premier.');
 }
@@ -39,6 +39,16 @@ export async function act(code, room, action) {
 }
 
 export async function resetToLobby(code) {
-  await update(ref(db, `rooms/${code}`), { game: null, deck: null, 'settings/status': 'waiting' });
+  await update(ref(db, `rooms/${code}`), { game: null, deck: null, reveal: null, 'settings/status': 'waiting' });
   await update(ref(db, `roomList/${code}`), { status: 'waiting' });
 }
+
+/** Déclenche la séquence de révélation une seule fois : tous les clients s'alignent sur le même instant de départ. */
+export const ensureReveal = code => runTransaction(ref(db, `rooms/${code}/reveal`), cur => cur ?? { startedAt: serverNow() + 500 }).catch(() => {});
+
+/** Statistiques du profil (une seule prise en compte par partie grâce à lastGame). */
+export const saveStats = (uid, gameId, won, total) => runTransaction(ref(db, `users/${uid}/stats`), cur => {
+  cur = cur || { games: 0, wins: 0, totalPower: 0, bestTeam: 0 };
+  if (cur.lastGame === gameId) return undefined;
+  return { games: cur.games + 1, wins: cur.wins + (won ? 1 : 0), totalPower: cur.totalPower + total, bestTeam: Math.max(cur.bestTeam || 0, total), lastGame: gameId };
+}).catch(() => {});
